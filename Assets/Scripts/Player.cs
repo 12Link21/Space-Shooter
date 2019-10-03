@@ -5,7 +5,20 @@ using UnityEngine;
 public class Player : MonoBehaviour
 {
     [SerializeField]
+    private GameObject _laserPrefab;
+
+    [SerializeField]
     private float _speed = 3.5f;
+
+    [SerializeField]
+    private float _screenTop = 5.75f;
+    [SerializeField]
+    private float _screenBottom = -3.75f;
+    [SerializeField]
+    private float _screenLeft = -10.25f;
+    [SerializeField]
+    private float _screenRight = 10.25f;
+
 
     // Start is called before the first frame update
     void Start()
@@ -17,6 +30,42 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.Translate(Vector3.right *_speed * Time.deltaTime);
+        CalculateMovement();
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+        }
+    }
+
+    void CalculateMovement()
+    {
+        //transform.Translate(Vector3.right *_speed * Time.deltaTime);
+        Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+        transform.Translate(direction * _speed * Time.deltaTime);
+
+        Vector3 clampedPosition = transform.position;
+        /*
+        if (transform.position.y >= _screenTop)
+        {
+            clampedPosition.y = _screenTop;
+        }
+        else if (transform.position.y <= _screenBottom)
+        {
+            clampedPosition.y = _screenBottom;
+        }*/
+
+        clampedPosition.y = Mathf.Clamp(transform.position.y, _screenBottom, _screenTop);
+
+        if (transform.position.x >= _screenRight)
+        {
+            clampedPosition.x = _screenLeft;
+        }
+        else if (transform.position.x <= _screenLeft)
+        {
+            clampedPosition.x = _screenRight;
+        }
+
+        transform.position = clampedPosition;
     }
 }
