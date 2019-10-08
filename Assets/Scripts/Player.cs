@@ -6,6 +6,11 @@ public class Player : MonoBehaviour
 {
     [SerializeField]
     private GameObject _laserPrefab;
+    [SerializeField]
+    private float _laserOffset = 0.8f;
+    [SerializeField]
+    private float _fireRate = 0.2f;
+    private float _canFire = -1.0f;
 
     [SerializeField]
     private float _speed = 3.5f;
@@ -32,9 +37,9 @@ public class Player : MonoBehaviour
     {
         CalculateMovement();
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
         {
-            Instantiate(_laserPrefab, transform.position, Quaternion.identity);
+            FireLaser();
         }
     }
 
@@ -67,5 +72,12 @@ public class Player : MonoBehaviour
         }
 
         transform.position = clampedPosition;
+    }
+
+    void FireLaser ()
+    {
+        _canFire = Time.time + _fireRate;
+        Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
+        Instantiate(_laserPrefab, spawnPosition, Quaternion.identity);
     }
 }
