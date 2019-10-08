@@ -32,13 +32,36 @@ public class Enemy : MonoBehaviour
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
 
-        Vector3 clampedPosition = transform.position;
-
         if (transform.position.y < _screenBottom)
         {
+            Vector3 clampedPosition = transform.position;
             clampedPosition.y = _screenTop;
             clampedPosition.x = Random.Range(_screenLeft, _screenRight);
             transform.position = clampedPosition;
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        switch (other.transform.tag)
+        {
+            case "Player":
+                Player player = other.transform.GetComponent<Player>();
+
+                if (player != null)
+                {
+                    player.Damage();
+                }
+
+                Destroy(this.gameObject);
+                break;
+            case "Laser":
+                Destroy(other.gameObject);
+                Destroy(this.gameObject);
+                break;
+            default:
+                Debug.Log("Weird interaction");
+                break;
         }
     }
 }

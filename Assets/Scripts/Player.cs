@@ -14,6 +14,8 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private float _speed = 3.5f;
+    [SerializeField]
+    private int _lives = 3;
 
     [SerializeField]
     private float _screenTop = 5.75f;
@@ -45,20 +47,10 @@ public class Player : MonoBehaviour
 
     void CalculateMovement()
     {
-        //transform.Translate(Vector3.right *_speed * Time.deltaTime);
         Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
         transform.Translate(direction * _speed * Time.deltaTime);
 
         Vector3 clampedPosition = transform.position;
-        /*
-        if (transform.position.y >= _screenTop)
-        {
-            clampedPosition.y = _screenTop;
-        }
-        else if (transform.position.y <= _screenBottom)
-        {
-            clampedPosition.y = _screenBottom;
-        }*/
 
         clampedPosition.y = Mathf.Clamp(transform.position.y, _screenBottom, _screenTop);
 
@@ -79,5 +71,15 @@ public class Player : MonoBehaviour
         _canFire = Time.time + _fireRate;
         Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
         Instantiate(_laserPrefab, spawnPosition, Quaternion.identity);
+    }
+
+    public void Damage()
+    {
+        _lives--;
+
+        if (_lives < 1)
+        {
+            Destroy(this.gameObject);
+        }
     }
 }
