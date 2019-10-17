@@ -7,13 +7,20 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _laserPrefab;
     [SerializeField]
+    private GameObject _tripleShootPrefab;
+    [SerializeField]
     private float _laserOffset = 0.8f;
     [SerializeField]
     private float _fireRate = 0.2f;
+    
+    private bool _isTripleShootActive = false;
+    private bool _isSpeedBoostActive = false;
     private float _canFire = -1.0f;
 
     [SerializeField]
     private float _speed = 3.5f;
+    [SerializeField]
+    private float _speedMultiplier = 2.0f;
     [SerializeField]
     private int _lives = 3;
 
@@ -34,7 +41,7 @@ public class Player : MonoBehaviour
     {
         transform.position = new Vector3(0, 0, 0);
 
-        SpawnManager spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+        spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
 
         if (spawnManager == null)
         {
@@ -56,7 +63,15 @@ public class Player : MonoBehaviour
     void CalculateMovement()
     {
         Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
-        transform.Translate(direction * _speed * Time.deltaTime);
+
+        if (_isSpeedBoostActive == false)
+        {
+            transform.Translate(direction * _speed * Time.deltaTime);
+        }
+        else
+        {
+            transform.Translate(direction * _speed * _speedMultiplier * Time.deltaTime);
+        }
 
         Vector3 clampedPosition = transform.position;
 
@@ -77,8 +92,17 @@ public class Player : MonoBehaviour
     void FireLaser ()
     {
         _canFire = Time.time + _fireRate;
-        Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
-        Instantiate(_laserPrefab, spawnPosition, Quaternion.identity);
+
+        if (_isTripleShootActive)
+        {
+            Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
+            Instantiate(_tripleShootPrefab, spawnPosition, Quaternion.identity);
+        }
+        else
+        {
+            Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
+            Instantiate(_laserPrefab, spawnPosition, Quaternion.identity);
+        }
     }
 
     public void Damage()
@@ -87,11 +111,32 @@ public class Player : MonoBehaviour
 
         if (_lives < 1)
         {
-            if (spawnManager != null)
-            {
-                spawnManager.OnPlayerDeath();
-            }
+            spawnManager.OnPlayerDeath();
             Destroy(this.gameObject);
         }
+    }
+
+    public void EnableTripleShoot()
+    {
+        _isTripleShootActive = true;
+        StartCoroutine(TripleShootPowerDownRoutine());
+    }
+
+    private IEnumerator TripleShootPowerDownRoutine()
+    {
+        yield return new WaitForSeconds(5.0f);
+        _isTripleShootActive = false;
+    }
+
+    public void EnableSpeedBoost()
+    {
+        _isSpeedBoostActive = true;
+        StartCoroutine(SpeedBoostPowerDownRoutine());
+    }
+
+    private IEnumerator SpeedBoostPowerDownRoutine()
+    {
+        yield return new WaitForSeconds(5.0f);
+        _isSpeedBoostActive = false;
     }
 }

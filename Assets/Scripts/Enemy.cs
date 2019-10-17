@@ -41,7 +41,7 @@ public class Enemy : MonoBehaviour
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    private void OnTriggerEnter2D(Collider2D other)
     {
         switch (other.transform.tag)
         {
@@ -60,7 +60,7 @@ public class Enemy : MonoBehaviour
                 Destroy(this.gameObject);
                 break;
             default:
-                Debug.Log("Weird interaction");
+                Debug.Log("Unsupported Interaction");
                 break;
         }
     }
