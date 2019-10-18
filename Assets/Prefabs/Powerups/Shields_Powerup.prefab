@@ -133,7 +133,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _speed: 3
-  powerupID: 2
+  _powerupID: 2
 --- !u!95 &4062267414702403922
 Animator:
   serializedVersion: 3
