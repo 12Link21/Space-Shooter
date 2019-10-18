@@ -48,7 +48,7 @@ public class Powerup : MonoBehaviour
                         player.EnableSpeedBoost();
                         break;
                     case 2:
-                        Debug.Log("Shields not implemented yet");
+                        player.EnableShields();
                         break;
                     default:
                         Debug.Log("Powerup not implemented");
