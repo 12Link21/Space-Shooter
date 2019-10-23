@@ -9,6 +9,11 @@ public class Enemy : MonoBehaviour
 
     private Player _player;
 
+    private Animator _animator;
+    private BoxCollider2D _collider;
+
+    private bool isDead = false;
+
     [SerializeField]
     private float _screenTop = 6.25f;
     [SerializeField]
@@ -26,6 +31,18 @@ public class Enemy : MonoBehaviour
         {
             Debug.LogError("Player not found");
         }
+
+        _animator = gameObject.GetComponent<Animator>();
+        if (_animator == null)
+        {
+            Debug.LogError("Enemy's Animator component not found");
+        }
+
+        _collider = gameObject.GetComponent<BoxCollider2D>();
+        if (_collider == null)
+        {
+            Debug.LogError("Enemy's BoxCollider2D component not found");
+        }
     }
 
     // Update is called once per frame
@@ -38,7 +55,7 @@ public class Enemy : MonoBehaviour
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
 
-        if (transform.position.y < _screenBottom)
+        if (transform.position.y < _screenBottom && isDead == false)
         {
             Vector3 clampedPosition = transform.position;
             clampedPosition.y = _screenTop;
@@ -53,20 +70,29 @@ public class Enemy : MonoBehaviour
         {
             case "Player":
                 _player.Damage();
-                Destroy(this.gameObject);
+                DeathRoutine();
                 break;
             case "Laser":
-                // Call Player.ChangeScore(10) from Player;
                 Destroy(other.gameObject);
                 if (_player != null)
                 {
                     _player.ChangeScore(10);
                 }
-                Destroy(this.gameObject);
+                DeathRoutine();
+                break;
+            case "Enemy":
                 break;
             default:
                 Debug.Log("Unsupported Interaction");
                 break;
         }
+    }
+
+    private void DeathRoutine()
+    {
+        isDead = true;
+        _animator.SetTrigger("OnDeath");
+        _collider.enabled = false;
+        Destroy(this.gameObject, 3.0f);
     }
 }
