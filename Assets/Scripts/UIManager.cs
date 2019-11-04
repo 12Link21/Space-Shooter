@@ -13,11 +13,17 @@ public class UIManager : MonoBehaviour
     private Text _gameOverText;
     [SerializeField]
     private Text _restartText;
+    [SerializeField]
+    private Text _instructionsText;
+    [SerializeField]
+    private Text _controlsText;
 
     [SerializeField]
     private Sprite[] _liveSprites;
 
     private GameManager _gameManager;
+
+    private Coroutine _instructionsTextCoroutine;
 
     // Start is called before the first frame update
     void Start()
@@ -26,6 +32,9 @@ public class UIManager : MonoBehaviour
         UpdateLives(3);
         _gameOverText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
+        _controlsText.gameObject.SetActive(true);
+        _instructionsTextCoroutine = StartCoroutine(FlickeringTextRoutine(_instructionsText));
+        //StartCoroutine(_instructionsTextCoroutine);
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
         if (_gameManager == null)
         {
@@ -52,6 +61,13 @@ public class UIManager : MonoBehaviour
         {
             GameOverSequence();
         }
+    }
+
+    public void GameStartSequence()
+    {
+        StopCoroutine(_instructionsTextCoroutine);
+        _instructionsText.gameObject.SetActive(false);
+        _controlsText.gameObject.SetActive(false);
     }
 
     private void GameOverSequence()

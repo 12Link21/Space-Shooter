@@ -5,21 +5,21 @@ using UnityEngine;
 public class Asteroid : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _explosionPrefab;
+    private GameObject _explosionPrefab;    
 
-    private SpawnManager _spawnManager;
+    [SerializeField]
+    private AudioClip _explosionSoundEffect;
 
     [SerializeField]
     private float _rotateSpeed = -3.0f;
 
+    [SerializeField]
+    private GameStarter _gameStarter = null;
+
     // Start is called before the first frame update
     void Start()
     {
-        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
-        if (_spawnManager == null)
-        {
-            Debug.LogError("Spawn Manager not found");
-        }
+
     }
 
     // Update is called once per frame
@@ -37,7 +37,13 @@ public class Asteroid : MonoBehaviour
                 Destroy(collision.gameObject);
                 GameObject explosion =  Instantiate(_explosionPrefab, transform.position, Quaternion.identity);
                 Destroy(explosion, 3.0f);
-                _spawnManager.StartSpawning();
+                AudioSource.PlayClipAtPoint(_explosionSoundEffect, new Vector3(0,0,-9));
+
+                if (_gameStarter != null)
+                {
+                    _gameStarter.SendStartMessage();
+                }
+
                 Destroy(this.gameObject);
                 break;
         }

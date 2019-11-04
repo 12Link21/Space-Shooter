@@ -15,6 +15,10 @@ public class Enemy : MonoBehaviour
     private bool isDead = false;
 
     [SerializeField]
+    private AudioClip _explosionSoundEffect;
+    private AudioSource _audioSource;
+
+    [SerializeField]
     private float _screenTop = 6.25f;
     [SerializeField]
     private float _screenBottom = -4.25f;
@@ -27,21 +31,32 @@ public class Enemy : MonoBehaviour
     void Start()
     {
         _player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        _animator = gameObject.GetComponent<Animator>();
+        _collider = gameObject.GetComponent<BoxCollider2D>();
+        _audioSource = GetComponent<AudioSource>();
+
         if (_player == null)
         {
             Debug.LogError("Player not found");
         }
 
-        _animator = gameObject.GetComponent<Animator>();
         if (_animator == null)
         {
             Debug.LogError("Enemy's Animator component not found");
         }
 
-        _collider = gameObject.GetComponent<BoxCollider2D>();
         if (_collider == null)
         {
             Debug.LogError("Enemy's BoxCollider2D component not found");
+        }
+
+        if (_audioSource == null)
+        {
+            Debug.LogError("Enemy's AudioSource component not found");
+        }
+        else
+        {
+            _audioSource.clip = _explosionSoundEffect;
         }
     }
 
@@ -93,6 +108,7 @@ public class Enemy : MonoBehaviour
         isDead = true;
         _animator.SetTrigger("OnDeath");
         _collider.enabled = false;
+        _audioSource.Play();
         Destroy(this.gameObject, 3.0f);
     }
 }

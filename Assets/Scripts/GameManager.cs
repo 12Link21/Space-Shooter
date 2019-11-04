@@ -7,10 +7,23 @@ public class GameManager : MonoBehaviour
 {
     private bool _isGameOver = false;
 
+    private UIManager _uiManager;
+    private SpawnManager _spawnManager;
+
     // Start is called before the first frame update
     void Start()
     {
-        
+        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
+        _uiManager = GameObject.Find("UI_Manager").GetComponent<UIManager>();
+
+        if (_spawnManager == null)
+        {
+            Debug.LogError("Spawn Manager not found");
+        }
+        if (_uiManager == null)
+        {
+            Debug.LogError("UI Manager not found");
+        }
     }
 
     // Update is called once per frame
@@ -20,6 +33,12 @@ public class GameManager : MonoBehaviour
         {
             SceneManager.LoadScene(1); // Current game scene
         }
+    }
+
+    public void GameStart()
+    {
+        _spawnManager.StartSpawning();
+        _uiManager.GameStartSequence();
     }
 
     public void GameOver()
