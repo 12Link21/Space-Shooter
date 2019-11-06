@@ -6,6 +6,7 @@ public class Laser : MonoBehaviour
 {
     [SerializeField]
     private float _speed = 8.0f;
+    private bool _isEnemyLaser = false;
 
     // Start is called before the first frame update
     void Start()
@@ -16,20 +17,65 @@ public class Laser : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        MovementCalculation();
+        if (_isEnemyLaser == false)
+        {
+            MovementCalculation(Vector3.up);
+        }
+        else
+        {
+            MovementCalculation(Vector3.down);
+        }
     }
 
-    void MovementCalculation()
+    void MovementCalculation(Vector3 direction)
     {
-        transform.Translate(Vector3.up * _speed * Time.deltaTime);
+        transform.Translate(direction * _speed * Time.deltaTime);
 
-        if (transform.position.y > 7.0f)
+        if (direction == Vector3.up)
         {
-            if (this.transform.parent != null)
+            if (transform.position.y > 7.0f)
             {
-                Destroy(this.transform.parent.gameObject);
+                if (this.transform.parent != null)
+                {
+                    Destroy(this.transform.parent.gameObject);
+                }
+                Destroy(this.gameObject);
             }
-            Destroy(this.gameObject);
         }
+        else if (direction == Vector3.down)
+        {
+            if (transform.position.y < -5.0f)
+            {
+                if (this.transform.parent != null)
+                {
+                    Destroy(this.transform.parent.gameObject);
+                }
+                Destroy(this.gameObject);
+            }
+        }
+    }
+
+    public void AssignLaserAsEnemy()
+    {
+        _isEnemyLaser = true;
+    }
+
+    public bool CheckIfEnemy()
+    {
+        return _isEnemyLaser;
+    }
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (collision.tag == "Player" && _isEnemyLaser == true)
+        {
+            Player player = collision.GetComponent<Player>();
+            if (player != null)
+            {
+                player.Damage();
+            }
+            Destroy(gameObject);
+        }
+        
     }
 }

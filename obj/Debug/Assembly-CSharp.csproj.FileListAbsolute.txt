@@ -271,3 +271,4 @@ C:\Users\AMD-A\Documents\Proyectos Unity\Space-Shooter\obj\Debug\Assembly-CSharp
 C:\Users\AMD-A\Documents\Proyectos Unity\Space-Shooter\obj\Debug\Assembly-CSharp.csproj.CopyComplete
 C:\Users\AMD-A\Documents\Proyectos Unity\Space-Shooter\obj\Debug\Assembly-CSharp.dll
 C:\Users\AMD-A\Documents\Proyectos Unity\Space-Shooter\obj\Debug\Assembly-CSharp.pdb
+C:\Users\AMD-A\Documents\Proyectos Unity\Space-Shooter\Temp\bin\Debug\Assembly-CSharp-firstpass.pdb

@@ -12,11 +12,21 @@ public class Enemy : MonoBehaviour
     private Animator _animator;
     private BoxCollider2D _collider;
 
-    private bool isDead = false;
+    private bool _isDead = false;
 
     [SerializeField]
     private AudioClip _explosionSoundEffect;
+    [SerializeField]
+    private AudioClip _laserSoundEffect;
     private AudioSource _audioSource;
+
+    [SerializeField]
+    private GameObject _doubleLaserPrefab;
+    private float _laserOffset = -0.8f;
+    [SerializeField]
+    private float _fireRate = 3.0f;
+    [SerializeField]
+    private float _canFire = -1.0f;
 
     [SerializeField]
     private float _screenTop = 6.25f;
@@ -58,19 +68,26 @@ public class Enemy : MonoBehaviour
         {
             _audioSource.clip = _explosionSoundEffect;
         }
+
+        //StartCoroutine(StartShooting());
     }
 
     // Update is called once per frame
     void Update()
     {
         CalculateMovement();
+
+        if (Time.time > _canFire && _isDead == false)
+        {
+            FireLaser();
+        }
     }
 
     void CalculateMovement()
     {
         transform.Translate(Vector3.down * _speed * Time.deltaTime);
 
-        if (transform.position.y < _screenBottom && isDead == false)
+        if (transform.position.y < _screenBottom && _isDead == false)
         {
             Vector3 clampedPosition = transform.position;
             clampedPosition.y = _screenTop;
@@ -88,27 +105,58 @@ public class Enemy : MonoBehaviour
                 DeathRoutine();
                 break;
             case "Laser":
-                Destroy(other.gameObject);
-                if (_player != null)
+                if (other.GetComponent<Laser>().CheckIfEnemy() == false)
                 {
-                    _player.ChangeScore(10);
+                    Destroy(other.gameObject);
+                    if (_player != null)
+                    {
+                        _player.ChangeScore(10);
+                    }
+                    DeathRoutine();
                 }
-                DeathRoutine();
                 break;
             case "Enemy":
                 break;
             default:
-                Debug.Log("Unsupported Interaction");
+                //Debug.Log("Unsupported Interaction");
                 break;
         }
     }
 
     private void DeathRoutine()
     {
-        isDead = true;
+        _isDead = true;
         _animator.SetTrigger("OnDeath");
         _collider.enabled = false;
         _audioSource.Play();
         Destroy(this.gameObject, 3.0f);
     }
+
+    private void FireLaser()
+    {
+        _fireRate = Random.Range(3.0f, 7.0f);
+        _canFire = Time.time + _fireRate;
+        Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
+        GameObject doubleLaser = Instantiate(_doubleLaserPrefab, spawnPosition, Quaternion.identity);
+        Laser[] lasers = doubleLaser.GetComponentsInChildren<Laser>();
+        foreach (Laser item in lasers)
+        {
+            item.AssignLaserAsEnemy();
+        }
+        AudioSource.PlayClipAtPoint(_laserSoundEffect, new Vector3(0, 0, -9),0.5f);
+    }
+
+    /*
+    private IEnumerator StartShooting()
+    {
+        yield return new WaitForSeconds(1.0f);
+        while (_isDead == false)
+        {
+            if(transform.position.y > _screenBottom)
+            {
+                FireLaser();
+            }
+            yield return new WaitForSeconds(Random.Range(3, 8));
+        }
+    }*/
 }

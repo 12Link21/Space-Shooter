@@ -51,6 +51,9 @@ MonoBehaviour:
   _speed: 4
   _explosionSoundEffect: {fileID: 8300000, guid: a885c043fab7e46438bba03ba9dab6bc,
     type: 3}
+  _laserSoundEffect: {fileID: 8300000, guid: 75676f361bdfeaf41a46623e95df3dbc, type: 3}
+  _doubleLaserPrefab: {fileID: 4603335517551510356, guid: f0cf6eba7fbb17d4bbd2f4bb6d9ab36a,
+    type: 3}
   _screenTop: 6.25
   _screenBottom: -4.25
   _screenLeft: -10.25

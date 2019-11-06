@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class Player : MonoBehaviour
 {
@@ -84,15 +85,28 @@ public class Player : MonoBehaviour
     {
         CalculateMovement();
 
-        if (Input.GetKeyDown(KeyCode.Space) && Time.time > _canFire)
+#if UNITY_ANDROID
+        if (CrossPlatformInputManager.GetButtonDown("Fire") && Time.time > _canFire)
         {
             FireLaser();
         }
+
+#else 
+        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0) && Time.time > _canFire)
+        {
+            FireLaser();
+        }
+#endif
     }
 
     void CalculateMovement()
     {
+#if UNITY_ANDROID
+        Vector3 direction = new Vector3(CrossPlatformInputManager.GetAxis("Horizontal"), CrossPlatformInputManager.GetAxis("Vertical"), 0);
+#else
         Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+#endif
+
 
         if (_isSpeedBoostActive == false)
         {
@@ -152,10 +166,12 @@ public class Player : MonoBehaviour
         if (_lives == 2)
         {
             _rightEngine.SetActive(true);
+            _audioSource.PlayOneShot(_explosionSoundEffect, .5f);
         }
         else if (_lives == 1)
         {
             _leftEngine.SetActive(true);
+            _audioSource.PlayOneShot(_explosionSoundEffect, .5f);
         }
         else if (_lives < 1)
         {
