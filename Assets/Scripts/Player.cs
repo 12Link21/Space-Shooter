@@ -36,6 +36,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private GameObject _leftEngine;
 
+    private Vector3 _startingPosition;
+
     [SerializeField]
     private int _score = 0;
 
@@ -58,7 +60,7 @@ public class Player : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        transform.position = new Vector3(0, 0, 0);
+        _startingPosition = transform.position;
 
         _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         _uiManager = GameObject.Find("UI_Manager").GetComponent<UIManager>();

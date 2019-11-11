@@ -32,9 +32,10 @@ public class UIManager : MonoBehaviour
         UpdateLives(3);
         _gameOverText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
+#if UNITY_STANDALONE_WIN
         _controlsText.gameObject.SetActive(true);
+#endif
         _instructionsTextCoroutine = StartCoroutine(FlickeringTextRoutine(_instructionsText));
-        //StartCoroutine(_instructionsTextCoroutine);
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
         if (_gameManager == null)
         {
@@ -83,7 +84,7 @@ public class UIManager : MonoBehaviour
     {
         while (true)
         {
-            text.gameObject.SetActive(!_gameOverText.gameObject.activeSelf);
+            text.gameObject.SetActive(!text.gameObject.activeSelf);
             yield return new WaitForSeconds(0.5f);
         }
     }

@@ -7,28 +7,40 @@ using UnityStandardAssets.CrossPlatformInput;
 public class MainMenu : MonoBehaviour
 {
     [SerializeField]
-    private GameObject _newGameButton;
+    private GameObject _singlePlayerButton;
+    [SerializeField]
+    private GameObject _coOpModeButton;
 
     // Start is called before the first frame update
     void Start()
     {
 #if UNITY_ANDROID
-        _newGameButton.SetActive(false);
+        _singlePlayerButton.SetActive(false);
+        _coOpModeButton.SetActive(false);
 #endif
     }
     // Update is called once per frame
     void Update()
     {
 #if UNITY_ANDROID
-        if (CrossPlatformInputManager.GetButtonDown("NewGame"))
+        if (CrossPlatformInputManager.GetButtonDown("SinglePlayer"))
         {
-            LoadGame();
+            SinglePlayerGame();
+        }
+        if (CrossPlatformInputManager.GetButtonDown("CoOpMode"))
+        {
+            CoOpModeGame();
         }
 #endif
     }
 
-    public void LoadGame()
+    public void SinglePlayerGame()
     {
-        SceneManager.LoadScene(1); // Load Game scene
+        SceneManager.LoadScene(1); // Load Single_Player scene
+    }
+
+    public void CoOpModeGame()
+    {
+        SceneManager.LoadScene(2); // Load Co-Op_Mode scene
     }
 }
