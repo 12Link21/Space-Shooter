@@ -7,6 +7,7 @@ public class Laser : MonoBehaviour
     [SerializeField]
     private float _speed = 8.0f;
     private bool _isEnemyLaser = false;
+    private GameObject _shooterPlayer;
 
     // Start is called before the first frame update
     void Start()
@@ -63,6 +64,16 @@ public class Laser : MonoBehaviour
     public bool CheckIfEnemy()
     {
         return _isEnemyLaser;
+    }
+
+    public void AssignShooterPlayer (GameObject player)
+    {
+        _shooterPlayer = player;
+    }
+
+    public GameObject CheckShooterPlayer()
+    {
+        return _shooterPlayer;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)

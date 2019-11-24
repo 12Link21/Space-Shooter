@@ -6,9 +6,9 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     [SerializeField]
-    private Text _scoreText;
+    private Text[] _scoreTexts;
     [SerializeField]
-    private Image _livesImg;
+    private Image[] _livesImgs;
     [SerializeField]
     private Text _gameOverText;
     [SerializeField]
@@ -17,6 +17,9 @@ public class UIManager : MonoBehaviour
     private Text _instructionsText;
     [SerializeField]
     private Text _controlsText;
+
+    [SerializeField]
+    private GameObject _pauseMenuPanel;
 
     [SerializeField]
     private Sprite[] _liveSprites;
@@ -28,19 +31,37 @@ public class UIManager : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        UpdateScore(0);
-        UpdateLives(3);
+        for (int c = 0; c < _scoreTexts.Length; c++)
+        {
+            UpdateScore(0, c);
+        }
+        for (int c =0; c < _livesImgs.Length; c++)
+        {
+            UpdateLives(3, c);
+
+        }
         _gameOverText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
-#if UNITY_STANDALONE_WIN
-        _controlsText.gameObject.SetActive(true);
-#endif
-        _instructionsTextCoroutine = StartCoroutine(FlickeringTextRoutine(_instructionsText));
+        _pauseMenuPanel.SetActive(false);
+
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
         if (_gameManager == null)
         {
             Debug.LogError("The Game_Manager is NULL");
         }
+
+#if UNITY_STANDALONE_WIN
+        if (_gameManager.IsSinglePlayer == true)
+        {
+            _controlsText.gameObject.SetActive(true);
+
+        }
+        else
+        {
+            _controlsText.gameObject.SetActive(false);
+        }
+#endif
+        _instructionsTextCoroutine = StartCoroutine(FlickeringTextRoutine(_instructionsText));
     }
 
     // Update is called once per frame
@@ -49,20 +70,20 @@ public class UIManager : MonoBehaviour
         
     }
 
-    public void UpdateScore(int score)
+    public void UpdateScore(int score, int player)
     {
-        _scoreText.text = "Score: " + score;
+        _scoreTexts[player].text = "Score: " + score;
     }
 
-    public void UpdateLives (int currentLives)
+    public void UpdateLives (int currentLives,int player)
     {
         if (currentLives > 0)
         {
-            _livesImg.sprite = _liveSprites[currentLives];
+            _livesImgs[player].sprite = _liveSprites[currentLives];
         } else if (currentLives <= 0)
         {
-            _livesImg.sprite = _liveSprites[0];
-            GameOverSequence();
+            _livesImgs[player].sprite = _liveSprites[0];
+            //GameOverSequence();
         }
     }
 
@@ -73,11 +94,16 @@ public class UIManager : MonoBehaviour
         _controlsText.gameObject.SetActive(false);
     }
 
-    private void GameOverSequence()
+    public void GameOverSequence()
     {
-        _gameManager.GameOver();
+        //_gameManager.GameOver();
         StartCoroutine(FlickeringTextRoutine(_gameOverText));
         _restartText.gameObject.SetActive(true);
+    }
+
+    public void PauseMenuSequence(bool isPaused)
+    {
+        _pauseMenuPanel.SetActive(isPaused);
     }
 
     private IEnumerator FlickeringTextRoutine(Text text)

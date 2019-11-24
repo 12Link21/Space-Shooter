@@ -7,7 +7,7 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private float _speed = 4.0f;
 
-    private Player _player;
+    private GameObject[] _player;
 
     private Animator _animator;
     private BoxCollider2D _collider;
@@ -40,14 +40,14 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
+        _player = GameObject.FindGameObjectsWithTag("Player");
         _animator = gameObject.GetComponent<Animator>();
         _collider = gameObject.GetComponent<BoxCollider2D>();
         _audioSource = GetComponent<AudioSource>();
 
-        if (_player == null)
+        if (_player.Length == 0)
         {
-            Debug.LogError("Player not found");
+            Debug.LogError("Players not found");
         }
 
         if (_animator == null)
@@ -101,17 +101,26 @@ public class Enemy : MonoBehaviour
         switch (other.transform.tag)
         {
             case "Player":
-                _player.Damage();
+                foreach (GameObject item in _player)
+                {
+                    if (other.gameObject == item)
+                    {
+                        item.GetComponent<Player>().Damage();
+                    }
+                }
                 DeathRoutine();
                 break;
             case "Laser":
                 if (other.GetComponent<Laser>().CheckIfEnemy() == false)
                 {
-                    Destroy(other.gameObject);
-                    if (_player != null)
+                    foreach (GameObject item in _player)
                     {
-                        _player.ChangeScore(10);
+                        if (other.GetComponent<Laser>().CheckShooterPlayer() == item)
+                        {
+                            item.GetComponent<Player>().ChangeScore(10);
+                        }
                     }
+                    Destroy(other.gameObject);
                     DeathRoutine();
                 }
                 break;

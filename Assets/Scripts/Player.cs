@@ -13,7 +13,7 @@ public class Player : MonoBehaviour
     private float _laserOffset = 0.8f;
     [SerializeField]
     private float _fireRate = 0.2f;
-    
+
     private bool _isTripleShootActive = false;
     private bool _isSpeedBoostActive = false;
     private bool _isShieldsActive = false;
@@ -26,8 +26,8 @@ public class Player : MonoBehaviour
     [SerializeField]
     private int _lives = 3;
 
-    private SpawnManager _spawnManager;
     private UIManager _uiManager;
+    private GameManager _gameManager;
 
     [SerializeField]
     private GameObject _shieldsVisual;
@@ -40,6 +40,16 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private int _score = 0;
+
+    [SerializeField]
+    private bool _isPlayer1;
+    [SerializeField]
+    private bool _isPlayer2;
+
+    private int _playerId;
+    private string _horizontalAxis;
+    private string _verticalAxis;
+    private KeyCode _fireButton;
 
     [SerializeField]
     private float _screenTop = 5.75f;
@@ -55,37 +65,68 @@ public class Player : MonoBehaviour
     [SerializeField]
     private AudioClip _explosionSoundEffect;
     private AudioSource _audioSource;
+    private Animator _animator;
 
 
     // Start is called before the first frame update
     void Start()
     {
+        if (_isPlayer1 == true)
+        {
+            _playerId = 0;
+            _horizontalAxis = "Horizontal";
+            _verticalAxis = "Vertical";
+            _fireButton = KeyCode.Space;
+        }
+        else if (_isPlayer2 == true)
+        {
+            _playerId = 1;
+            _horizontalAxis = "Horizontal2";
+            _verticalAxis = "Vertical2";
+            _fireButton = KeyCode.Return;
+        }
+        else
+        {
+            Debug.LogError("Invalid Player detected");
+        }
+
         _startingPosition = transform.position;
 
-        _spawnManager = GameObject.Find("Spawn_Manager").GetComponent<SpawnManager>();
         _uiManager = GameObject.Find("UI_Manager").GetComponent<UIManager>();
+        _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
         _audioSource = GetComponent<AudioSource>();
-
-        if (_spawnManager == null)
-        {
-            Debug.LogError("The Spawn_Manager is NULL");
-        }
+        _animator = GetComponent<Animator>();
 
         if (_uiManager == null)
         {
             Debug.LogError("The UI_Manager is NULL");
         }
 
+        if (_gameManager == null)
+        {
+            Debug.LogError("The Game_Manager is NULL");
+        }
+
         if (_audioSource == null)
         {
-            Debug.LogError("Player's AudioSource component not found");
+            Debug.LogError(this.name + "'s AudioSource component not found");
+        }
+
+        if (_audioSource == null)
+        {
+            Debug.LogError(this.name + "'s AudioSource component not found");
+        }
+
+        if (_animator == null)
+        {
+            Debug.LogError(this.name + "'s Animator component not found");
         }
     }
 
     // Update is called once per frame
     void Update()
     {
-        CalculateMovement();
+        CalculateMovement(_horizontalAxis, _verticalAxis);
 
 #if UNITY_ANDROID
         if (CrossPlatformInputManager.GetButtonDown("Fire") && Time.time > _canFire)
@@ -94,21 +135,31 @@ public class Player : MonoBehaviour
         }
 
 #else 
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0) && Time.time > _canFire)
+        if (_gameManager.IsSinglePlayer == true)
         {
-            FireLaser();
+            if (Input.GetKeyDown(_fireButton) || Input.GetMouseButtonDown(0) && Time.time > _canFire)
+            {
+                FireLaser();
+            }
+        }
+        else
+        {
+            if (Input.GetKeyDown(_fireButton) && Time.time > _canFire)
+            {
+                FireLaser();
+            }
         }
 #endif
     }
 
-    void CalculateMovement()
+    void CalculateMovement(string h, string v)
     {
 #if UNITY_ANDROID
         Vector3 direction = new Vector3(CrossPlatformInputManager.GetAxis("Horizontal"), CrossPlatformInputManager.GetAxis("Vertical"), 0);
 #else
-        Vector3 direction = new Vector3(Input.GetAxis("Horizontal"), Input.GetAxis("Vertical"), 0);
+        Vector3 direction = new Vector3(Input.GetAxis(h), Input.GetAxis(v), 0);
 #endif
-
+        _animator.SetFloat("Direction", direction.x);
 
         if (_isSpeedBoostActive == false)
         {
@@ -142,12 +193,17 @@ public class Player : MonoBehaviour
         if (_isTripleShootActive)
         {
             Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y, transform.position.z);
-            Instantiate(_tripleShootPrefab, spawnPosition, Quaternion.identity);
+            GameObject tripleLaser = Instantiate(_tripleShootPrefab, spawnPosition, Quaternion.identity);
+            foreach (Transform child in tripleLaser.transform)
+            {
+                child.GetComponent<Laser>().AssignShooterPlayer(this.gameObject);
+            }
         }
         else
         {
             Vector3 spawnPosition = new Vector3(transform.position.x, transform.position.y + _laserOffset, transform.position.z);
-            Instantiate(_laserPrefab, spawnPosition, Quaternion.identity);
+            GameObject laser = Instantiate(_laserPrefab, spawnPosition, Quaternion.identity);
+            laser.GetComponent<Laser>().AssignShooterPlayer(this.gameObject);
         }
 
         _audioSource.PlayOneShot(_laserSoundEffect);
@@ -163,7 +219,7 @@ public class Player : MonoBehaviour
         }
         _lives--;
 
-        _uiManager.UpdateLives(_lives);
+        _uiManager.UpdateLives(_lives,_playerId);
 
         if (_lives == 2)
         {
@@ -177,8 +233,22 @@ public class Player : MonoBehaviour
         }
         else if (_lives < 1)
         {
-            _spawnManager.OnPlayerDeath();
-            _audioSource.PlayOneShot(_explosionSoundEffect);
+            AudioSource.PlayClipAtPoint(_explosionSoundEffect, new Vector3(0, 0, -9));
+            if (_gameManager.Players.Count == 1)
+            {
+                _gameManager.GameOver();
+            }
+            else
+            {
+                foreach (GameObject item in _gameManager.Players)
+                {
+                    if (item == this.gameObject)
+                    {
+                        _gameManager.Players.Remove(item);
+                        break;
+                    }
+                }
+            }
             Destroy(this.gameObject);
         }
     }
@@ -217,6 +287,6 @@ public class Player : MonoBehaviour
     {
         _score += points;
         // call UpdateScore(_score) from UI_Manager.UIMAnager
-        _uiManager.UpdateScore(_score);
+        _uiManager.UpdateScore(_score,_playerId);
     }
 }

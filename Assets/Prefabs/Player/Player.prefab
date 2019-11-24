@@ -112,6 +112,7 @@ GameObject:
   - component: {fileID: 9207741534915994656}
   - component: {fileID: 9207741534915994655}
   - component: {fileID: 9207741534915994652}
+  - component: {fileID: 7761422371341200974}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -210,6 +211,8 @@ MonoBehaviour:
   _rightEngine: {fileID: 9207741534543807865}
   _leftEngine: {fileID: 9207741535784350448}
   _score: 0
+  _isPlayer1: 0
+  _isPlayer2: 0
   _screenTop: 5.75
   _screenBottom: -3.75
   _screenLeft: -10.25
@@ -339,6 +342,25 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!95 &7761422371341200974
+Animator:
+  serializedVersion: 3
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9207741534915994659}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 9100000, guid: cc868081a51a52e428795267cdddb397, type: 2}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorControllerStateOnDisable: 0
 --- !u!1 &9207741535633686578
 GameObject:
   m_ObjectHideFlags: 0
