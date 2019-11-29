@@ -19,6 +19,9 @@ public class Player : MonoBehaviour
     private bool _isShieldsActive = false;
     private float _canFire = -1.0f;
 
+    private Coroutine _tripleShootCoroutine;
+    private Coroutine _speedBoostCoroutine;
+
     [SerializeField]
     private float _speed = 3.5f;
     [SerializeField]
@@ -40,6 +43,11 @@ public class Player : MonoBehaviour
 
     [SerializeField]
     private int _score = 0;
+
+    public int Score
+    {
+        get { return _score; }
+    }
 
     [SerializeField]
     private bool _isPlayer1;
@@ -128,28 +136,31 @@ public class Player : MonoBehaviour
     {
         CalculateMovement(_horizontalAxis, _verticalAxis);
 
+        if (_gameManager.IsGamePaused == false)
+        {
 #if UNITY_ANDROID
         if (CrossPlatformInputManager.GetButtonDown("Fire") && Time.time > _canFire)
         {
             FireLaser();
         }
 
-#else 
-        if (_gameManager.IsSinglePlayer == true)
-        {
-            if (Input.GetKeyDown(_fireButton) || Input.GetMouseButtonDown(0) && Time.time > _canFire)
+#else
+            if (_gameManager.IsSinglePlayer == true)
             {
-                FireLaser();
+                if (Input.GetKeyDown(_fireButton) || Input.GetMouseButtonDown(0) && Time.time > _canFire && _gameManager.IsGamePaused == false)
+                {
+                    FireLaser();
+                }
             }
-        }
-        else
-        {
-            if (Input.GetKeyDown(_fireButton) && Time.time > _canFire)
+            else
             {
-                FireLaser();
+                if (Input.GetKeyDown(_fireButton) && Time.time > _canFire && _gameManager.IsGamePaused == false)
+                {
+                    FireLaser();
+                }
             }
-        }
 #endif
+        }
     }
 
     void CalculateMovement(string h, string v)
@@ -236,6 +247,7 @@ public class Player : MonoBehaviour
             AudioSource.PlayClipAtPoint(_explosionSoundEffect, new Vector3(0, 0, -9));
             if (_gameManager.Players.Count == 1)
             {
+                _gameManager.GameScore += _score;
                 _gameManager.GameOver();
             }
             else
@@ -244,6 +256,7 @@ public class Player : MonoBehaviour
                 {
                     if (item == this.gameObject)
                     {
+                        _gameManager.GameScore += _score;
                         _gameManager.Players.Remove(item);
                         break;
                     }
@@ -256,7 +269,11 @@ public class Player : MonoBehaviour
     public void EnableTripleShoot()
     {
         _isTripleShootActive = true;
-        StartCoroutine(TripleShootPowerDownRoutine());
+        if (_tripleShootCoroutine != null)
+        {
+            StopCoroutine(_tripleShootCoroutine);
+        }
+        _tripleShootCoroutine = StartCoroutine(TripleShootPowerDownRoutine());
     }
 
     private IEnumerator TripleShootPowerDownRoutine()
@@ -268,7 +285,11 @@ public class Player : MonoBehaviour
     public void EnableSpeedBoost()
     {
         _isSpeedBoostActive = true;
-        StartCoroutine(SpeedBoostPowerDownRoutine());
+        if (_speedBoostCoroutine != null)
+        {
+            StopCoroutine(_speedBoostCoroutine);
+        }
+        _speedBoostCoroutine = StartCoroutine(SpeedBoostPowerDownRoutine());
     }
 
     private IEnumerator SpeedBoostPowerDownRoutine()

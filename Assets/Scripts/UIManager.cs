@@ -12,6 +12,8 @@ public class UIManager : MonoBehaviour
     [SerializeField]
     private Text _gameOverText;
     [SerializeField]
+    private Text _bestScoreText;
+    [SerializeField]
     private Text _restartText;
     [SerializeField]
     private Text _instructionsText;
@@ -20,6 +22,11 @@ public class UIManager : MonoBehaviour
 
     [SerializeField]
     private GameObject _pauseMenuPanel;
+
+    [SerializeField]
+    private GameObject _mobilePausePanel;
+    [SerializeField]
+    private GameObject _mobileRestartButton;
 
     [SerializeField]
     private Sprite[] _liveSprites;
@@ -35,22 +42,27 @@ public class UIManager : MonoBehaviour
         {
             UpdateScore(0, c);
         }
-        for (int c =0; c < _livesImgs.Length; c++)
+        for (int c = 0; c < _livesImgs.Length; c++)
         {
             UpdateLives(3, c);
 
         }
         _gameOverText.gameObject.SetActive(false);
+        _bestScoreText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
         _pauseMenuPanel.SetActive(false);
+        _mobilePausePanel.SetActive(false);
+        _mobileRestartButton.SetActive(false);
 
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
         if (_gameManager == null)
         {
             Debug.LogError("The Game_Manager is NULL");
         }
-
-#if UNITY_STANDALONE_WIN
+        
+#if UNITY_ANDROID
+        _instructionsText.transform.localPosition= new Vector3(0, -175, 0);
+#else 
         if (_gameManager.IsSinglePlayer == true)
         {
             _controlsText.gameObject.SetActive(true);
@@ -60,6 +72,7 @@ public class UIManager : MonoBehaviour
         {
             _controlsText.gameObject.SetActive(false);
         }
+        
 #endif
         _instructionsTextCoroutine = StartCoroutine(FlickeringTextRoutine(_instructionsText));
     }
@@ -94,16 +107,32 @@ public class UIManager : MonoBehaviour
         _controlsText.gameObject.SetActive(false);
     }
 
-    public void GameOverSequence()
+    public void GameOverSequence(int game, int best)
     {
         //_gameManager.GameOver();
         StartCoroutine(FlickeringTextRoutine(_gameOverText));
+        SetBestScoreText(game, best);
+        _bestScoreText.gameObject.SetActive(true);
+#if UNITY_ANDROID
+        _mobileRestartButton.SetActive(true);
+#else
         _restartText.gameObject.SetActive(true);
+#endif
     }
 
     public void PauseMenuSequence(bool isPaused)
     {
+#if UNITY_ANDROID
+        _mobilePausePanel.SetActive(isPaused);
+#else  
         _pauseMenuPanel.SetActive(isPaused);
+#endif
+    }
+
+    public void SetBestScoreText (int game, int best)
+    {
+        string text = "Your Score: " + game + "\nBest Score: " + best;
+        _bestScoreText.text = text;
     }
 
     private IEnumerator FlickeringTextRoutine(Text text)

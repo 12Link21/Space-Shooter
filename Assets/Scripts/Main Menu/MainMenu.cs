@@ -6,17 +6,27 @@ using UnityStandardAssets.CrossPlatformInput;
 
 public class MainMenu : MonoBehaviour
 {
-    [SerializeField]
+    /*[SerializeField]
     private GameObject _singlePlayerButton;
     [SerializeField]
     private GameObject _coOpModeButton;
+    */
+    [SerializeField]
+    private GameObject _optionsPanel;
+    [SerializeField]
+    private GameObject _mobileOptionsPanel;
 
     // Start is called before the first frame update
     void Start()
     {
 #if UNITY_ANDROID
-        _singlePlayerButton.SetActive(false);
-        _coOpModeButton.SetActive(false);
+        _optionsPanel.SetActive(false);
+        _mobileOptionsPanel.SetActive(true);
+        //_singlePlayerButton.SetActive(false);
+        //_coOpModeButton.SetActive(false);
+#else
+        _optionsPanel.SetActive(true);
+        _mobileOptionsPanel.SetActive(false);
 #endif
     }
     // Update is called once per frame
@@ -27,9 +37,9 @@ public class MainMenu : MonoBehaviour
         {
             SinglePlayerGame();
         }
-        if (CrossPlatformInputManager.GetButtonDown("CoOpMode"))
+        if (CrossPlatformInputManager.GetButtonDown("ExitGame"))
         {
-            CoOpModeGame();
+            GameExit();
         }
 #endif
     }
@@ -42,5 +52,13 @@ public class MainMenu : MonoBehaviour
     public void CoOpModeGame()
     {
         SceneManager.LoadScene(2); // Load Co-Op_Mode scene
+    }
+
+    public void GameExit()
+    {
+#if UNITY_EDITOR_WIN
+        Debug.Log("Closing Application");
+#endif
+        Application.Quit();
     }
 }

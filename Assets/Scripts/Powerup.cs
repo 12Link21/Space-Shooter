@@ -12,10 +12,12 @@ public class Powerup : MonoBehaviour
     [SerializeField]
     private AudioClip _powerupAudio;
 
+    private Collider2D _powerUpCollider;
+
     // Start is called before the first frame update
     void Start()
     {
-
+        _powerUpCollider = GetComponent<Collider2D>();
     }
 
     // Update is called once per frame
@@ -38,6 +40,7 @@ public class Powerup : MonoBehaviour
     {
         if (collision.transform.tag == "Player")
         {
+            _powerUpCollider.enabled = false;
             Player player = collision.transform.GetComponent<Player>();
             AudioSource.PlayClipAtPoint(_powerupAudio, new Vector3(0, 0, -9));
 

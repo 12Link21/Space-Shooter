@@ -7,10 +7,12 @@ public class Enemy : MonoBehaviour
     [SerializeField]
     private float _speed = 4.0f;
 
-    private GameObject[] _player;
+    //private GameObject[] _player;
 
     private Animator _animator;
     private BoxCollider2D _collider;
+
+    private GameManager _gameManager;
 
     private bool _isDead = false;
 
@@ -40,15 +42,21 @@ public class Enemy : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        _player = GameObject.FindGameObjectsWithTag("Player");
+        //_player = GameObject.FindGameObjectsWithTag("Player");
         _animator = gameObject.GetComponent<Animator>();
         _collider = gameObject.GetComponent<BoxCollider2D>();
         _audioSource = GetComponent<AudioSource>();
+        _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
 
-        if (_player.Length == 0)
+        if (_gameManager == null)
         {
-            Debug.LogError("Players not found");
+            Debug.LogError("The Game_Manager is NULL");
         }
+
+        //if (_player.Length == 0)
+        //{
+        //    Debug.LogError("Players not found");
+        //}
 
         if (_animator == null)
         {
@@ -101,23 +109,31 @@ public class Enemy : MonoBehaviour
         switch (other.transform.tag)
         {
             case "Player":
-                foreach (GameObject item in _player)
+                foreach (GameObject item in _gameManager.Players)
                 {
                     if (other.gameObject == item)
                     {
-                        item.GetComponent<Player>().Damage();
+                        if (item != null)
+                        {
+                            item.GetComponent<Player>().Damage();
+                            break;
+                        }
                     }
                 }
                 DeathRoutine();
                 break;
             case "Laser":
-                if (other.GetComponent<Laser>().CheckIfEnemy() == false)
+                if (other.GetComponent<Laser>().CheckIfEnemy() == false && _gameManager.IsGameOver == false)
                 {
-                    foreach (GameObject item in _player)
+                    foreach (GameObject item in _gameManager.Players)
                     {
                         if (other.GetComponent<Laser>().CheckShooterPlayer() == item)
                         {
-                            item.GetComponent<Player>().ChangeScore(10);
+                            if (item != null)
+                            {
+                                item.GetComponent<Player>().ChangeScore(10);
+                                break;
+                            }
                         }
                     }
                     Destroy(other.gameObject);

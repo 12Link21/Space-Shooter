@@ -2,11 +2,23 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityStandardAssets.CrossPlatformInput;
 
 public class GameManager : MonoBehaviour
 {
     private bool _isGameOver = false;
+
+    public bool IsGameOver
+    {
+        get { return _isGameOver; }
+    }
+
     private bool _isGamePaused = false;
+
+    public bool IsGamePaused
+    {
+        get { return _isGamePaused; }
+    }
 
     private UIManager _uiManager;
     private SpawnManager _spawnManager;
@@ -25,16 +37,28 @@ public class GameManager : MonoBehaviour
         get { return _players; }
     }
 
+    private int _gameScore = 0;
+
+    public int GameScore
+    {
+        get { return _gameScore; }
+        set { _gameScore = value; }
+    }
+
+    private int _bestScore;
+
     // Start is called before the first frame update
     void Start()
     {
         if (SceneManager.GetActiveScene().name == "Single_Player")
         {
             _isSinglePlayer = true;
+            _bestScore = PlayerPrefs.GetInt("HighScoreSingle", 0);
         }
         if (SceneManager.GetActiveScene().name == "Co-Op_Mode")
         {
             _isSinglePlayer = false;
+            _bestScore = PlayerPrefs.GetInt("HighScoreCoop", 0);
         }
 
         GameObject[] playersArray = GameObject.FindGameObjectsWithTag("Player");
@@ -60,12 +84,35 @@ public class GameManager : MonoBehaviour
         {
             Debug.LogError("UI Manager not found");
         }
+
     }
 
     // Update is called once per frame
     void Update()
     {
-#if UNITY_STANDALONE_WIN
+
+#if UNITY_ANDROID
+        if (CrossPlatformInputManager.GetButtonDown("Menu"))
+        {
+            GamePause();
+        }
+        if (CrossPlatformInputManager.GetButtonDown("Resume") && _isGamePaused == true)
+        {
+            GameResume();
+        }
+        if (CrossPlatformInputManager.GetButtonDown("MainMenu") && _isGamePaused == true)
+        {
+            ReturnMainMenu();
+        }
+        if (CrossPlatformInputManager.GetButtonDown("Exit") && _isGamePaused == true)
+        {
+            GameExit();
+        }
+        if (CrossPlatformInputManager.GetButtonDown("Restart") && _isGameOver == true)
+        {
+            RestartSinglePlayer();
+        }
+#else
         if (Input.GetKeyDown(KeyCode.R) && _isGameOver == true)
         {
             if (_isSinglePlayer == true)
@@ -101,7 +148,19 @@ public class GameManager : MonoBehaviour
     {
         _isGameOver = true;
         _spawnManager.StopSpawning();
-        _uiManager.GameOverSequence();
+        if (_gameScore > _bestScore)
+        {
+            _bestScore = _gameScore;
+            if (_isSinglePlayer == true)
+            {
+                PlayerPrefs.SetInt("HighScoreSingle", _bestScore);
+            }
+            else
+            {
+                PlayerPrefs.SetInt("HighScoreCoop", _bestScore);
+            }
+        }
+        _uiManager.GameOverSequence(_gameScore, _bestScore);
     }
 
     public void GamePause()
@@ -120,6 +179,9 @@ public class GameManager : MonoBehaviour
 
     public void GameExit()
     {
+#if UNITY_EDITOR_WIN
+        Debug.Log("Closing Application");
+#endif
         Application.Quit();
     }
 
