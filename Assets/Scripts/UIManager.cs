@@ -24,16 +24,18 @@ public class UIManager : MonoBehaviour
     private GameObject _pauseMenuPanel;
 
     [SerializeField]
-    private GameObject _mobilePausePanel;
-    [SerializeField]
-    private GameObject _mobileRestartButton;
-
-    [SerializeField]
     private Sprite[] _liveSprites;
 
     private GameManager _gameManager;
 
     private Coroutine _instructionsTextCoroutine;
+
+#if UNITY_ANDROID
+    [SerializeField]
+    private GameObject _mobilePausePanel;
+    [SerializeField]
+    private GameObject _mobileRestartButton;
+#endif
 
     // Start is called before the first frame update
     void Start()
@@ -51,18 +53,18 @@ public class UIManager : MonoBehaviour
         _bestScoreText.gameObject.SetActive(false);
         _restartText.gameObject.SetActive(false);
         _pauseMenuPanel.SetActive(false);
-        _mobilePausePanel.SetActive(false);
-        _mobileRestartButton.SetActive(false);
 
         _gameManager = GameObject.Find("Game_Manager").GetComponent<GameManager>();
         if (_gameManager == null)
         {
             Debug.LogError("The Game_Manager is NULL");
         }
-        
+
 #if UNITY_ANDROID
+        _mobilePausePanel.SetActive(false);
+        _mobileRestartButton.SetActive(false);
         _instructionsText.transform.localPosition= new Vector3(0, -175, 0);
-#else 
+#else
         if (_gameManager.IsSinglePlayer == true)
         {
             _controlsText.gameObject.SetActive(true);
@@ -124,7 +126,7 @@ public class UIManager : MonoBehaviour
     {
 #if UNITY_ANDROID
         _mobilePausePanel.SetActive(isPaused);
-#else  
+#else
         _pauseMenuPanel.SetActive(isPaused);
 #endif
     }

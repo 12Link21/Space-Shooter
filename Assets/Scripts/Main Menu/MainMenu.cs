@@ -11,22 +11,26 @@ public class MainMenu : MonoBehaviour
     [SerializeField]
     private GameObject _coOpModeButton;
     */
+
+#if UNITY_ANDROID
+        [SerializeField]
+    private GameObject _mobileOptionsPanel;
+#else
     [SerializeField]
     private GameObject _optionsPanel;
-    [SerializeField]
-    private GameObject _mobileOptionsPanel;
+#endif
 
     // Start is called before the first frame update
     void Start()
     {
 #if UNITY_ANDROID
-        _optionsPanel.SetActive(false);
+        //_optionsPanel.SetActive(false);
         _mobileOptionsPanel.SetActive(true);
         //_singlePlayerButton.SetActive(false);
         //_coOpModeButton.SetActive(false);
 #else
         _optionsPanel.SetActive(true);
-        _mobileOptionsPanel.SetActive(false);
+        //_mobileOptionsPanel.SetActive(false);
 #endif
     }
     // Update is called once per frame
